@@ -7,7 +7,20 @@ import (
         "fmt"
         "io/ioutil"
         "net/http"
+        "time"
 )
+
+type Parameters struct {
+  Assertion string  `json:"assertion"`
+  Audience string `json:"audience"`
+}
+
+type IdentityOpinionated struct {
+        Email string
+//        Audience url.Url
+        Expires time.Time
+        Issuer string
+}
 
 type Identity struct {
         Email string
@@ -16,8 +29,9 @@ type Identity struct {
         Issuer string
 }
 
-func Verify(parameters map[string]interface{}) (*Identity, error) {
+func Verify(parameters *Parameters) (*Identity, error) {
         b, err := json.Marshal(parameters)
+fmt.Println(string(b))
         if err != nil {
                 return nil, err
         }
@@ -27,8 +41,8 @@ func Verify(parameters map[string]interface{}) (*Identity, error) {
         if err != nil {
                 return nil, err
         }
+        fmt.Println(string(body))
         response := make(map[string]string);
         json.Unmarshal(body, response);
-        fmt.Println(response["status"])
         return nil, nil
 }
