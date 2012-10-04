@@ -2,47 +2,46 @@
 package persona
 
 import (
-        "bytes"
-        "encoding/json"
-        "fmt"
-        "io/ioutil"
-        "net/http"
-        "time"
+	"bytes"
+	"encoding/json"
+	"errors"
+	"io/ioutil"
+	"net/http"
+
+//	"time"
 )
 
 type Parameters struct {
-  Assertion string  `json:"assertion"`
-  Audience string `json:"audience"`
-}
-
-type IdentityOpinionated struct {
-        Email string
-//        Audience url.Url
-        Expires time.Time
-        Issuer string
+	Assertion string `json:"assertion"`
+	Audience  string `json:"audience"`
 }
 
 type Identity struct {
-        Email string
-        Audience string
-        Expires string
-        Issuer string
+	Reason  string
+	Email    string
+	Audience string
+	Expires  int64
+	Issuer   string
 }
 
 func Verify(parameters *Parameters) (*Identity, error) {
-        b, err := json.Marshal(parameters)
-fmt.Println(string(b))
-        if err != nil {
-                return nil, err
-        }
-        resp, err := http.Post("https://verifier.login.persona.org/verify", "application/json", bytes.NewBuffer(b))
-        defer resp.Body.Close();
-        body, err := ioutil.ReadAll(resp.Body)
-        if err != nil {
-                return nil, err
-        }
-        fmt.Println(string(body))
-        response := make(map[string]string);
-        json.Unmarshal(body, response);
-        return nil, nil
+	b, err := json.Marshal(parameters)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := http.Post("https://verifier.login.persona.org/verify", "application/json", bytes.NewBuffer(b))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	i := new(Identity)
+	json.Unmarshal(body, i)
+	if i.Reason != "" {
+		return nil, errors.New(i.Reason)
+	}
+	return i, nil
 }
