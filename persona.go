@@ -17,7 +17,7 @@ type Parameters struct {
 	Audience  string `json:"audience"`
 }
 
-//ExpiryTime is used as an embedded struct in Identity and inherits all the methods of time.Time
+//expiryTime is used as an embedded struct in Identity and inherits all the methods of time.Time
 //except UnmarshalJSON
 type expiryTime struct {
 	time.Time
