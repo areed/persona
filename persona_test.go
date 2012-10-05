@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"testing"
+	"time"
 )
 
 func TestVerify(t *testing.T) {
@@ -17,9 +18,9 @@ func TestVerify(t *testing.T) {
 	if err == nil {
 		t.Error("Invalid assertion should have returned an error")
 	}
-        if user != nil {
-                t.Error("user should be nil")
-        }
+	if user != nil {
+		t.Error("user should be nil")
+	}
 
 	http.Handle("/", http.FileServer(http.Dir("./")))
 
@@ -36,12 +37,13 @@ func TestVerify(t *testing.T) {
 			t.Error(err)
 			return
 		}
-                if user.Audience == "" || user.Email == "" || user.Expires == 0 || user.Issuer == "" {
-                        t.Error("Identity struct not populated")
-                }
-                if user.Reason != "" {
-                        t.Error("reason should be empty")
-                }
+		if user.Audience == "" || user.Email == "" || user.Issuer == "" {
+			t.Error("Identity struct string fields not populated")
+		}
+		//test will break for a couple minutes on New Year's Eve every year
+		if time.Now().Year() != user.Expires.Year() {
+			t.Error("The expiry year was ", user.Expires.Year())
+		}
 		return
 	})
 
