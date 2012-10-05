@@ -19,12 +19,12 @@ type Parameters struct {
 
 //ExpiryTime is used as an embedded struct in Identity and inherits all the methods of time.Time
 //except UnmarshalJSON
-type ExpiryTime struct {
+type expiryTime struct {
 	time.Time
 }
 
 //UnmarshalJSON takes the milliseconds since 1/1/1970 and converts it into type time.Time
-func (e *ExpiryTime) UnmarshalJSON(data []byte) (err error) {
+func (e *expiryTime) UnmarshalJSON(data []byte) (err error) {
 	milliseconds, err := strconv.ParseInt(string(data), 10, 64)
 	if err != nil {
 		return err
@@ -33,12 +33,11 @@ func (e *ExpiryTime) UnmarshalJSON(data []byte) (err error) {
 	return
 }
 
-//Identity is the type returned to the application if authentication succeeds.  Identity.Reason will
-//always be an empty string.
+//Identity is the type returned to the application if authentication succeeds
 type Identity struct {
 	Email    string
 	Audience string
-	Expires  *ExpiryTime
+	Expires  *expiryTime
 	Issuer   string
 }
 
