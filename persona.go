@@ -70,3 +70,12 @@ func Verify(parameters *Parameters) (*Identity, error) {
 	json.Unmarshal(body, i)
 	return i, nil
 }
+
+//a convenience function that allows assertion and audience to be passed as strings instead of as
+//fields of Parameter
+func VerifyArgs(assertion, audience string) (*Identity, error) {
+	p := new(Parameters)
+	p.Assertion = assertion
+	p.Audience = audience
+	return Verify(p)
+}

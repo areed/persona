@@ -9,11 +9,15 @@ import (
 	"time"
 )
 
+const host, port string = "http://localhost", ":8000"
+
+var audience string = host + port
+
 func TestVerify(t *testing.T) {
 	//should not authenticate
 	parameters := new(Parameters)
 	parameters.Assertion = "ABCDEFG1234567"
-	parameters.Audience = "http://localhost:8000"
+	parameters.Audience = audience
 	user, err := Verify(parameters)
 	if err == nil {
 		t.Error("Invalid assertion should have returned an error")
@@ -21,7 +25,9 @@ func TestVerify(t *testing.T) {
 	if user != nil {
 		t.Error("user should be nil")
 	}
+}
 
+func TestVerifyArgs(t *testing.T) {
 	http.Handle("/", http.FileServer(http.Dir("./")))
 
 	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
@@ -29,10 +35,9 @@ func TestVerify(t *testing.T) {
 		if err != nil {
 			return
 		}
-		parameters := new(Parameters)
-		json.Unmarshal(body, parameters)
-		parameters.Audience = "http://localhost:8000"
-		user, err = Verify(parameters)
+		var v interface{}
+		json.Unmarshal(body, &v)
+		user, err := VerifyArgs(v.(map[string]interface{})["assertion"].(string), audience)
 		if err != nil {
 			t.Error(err)
 			return
@@ -47,7 +52,7 @@ func TestVerify(t *testing.T) {
 		return
 	})
 
-	err = http.ListenAndServe(":8000", nil)
+	err := http.ListenAndServe(port, nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
